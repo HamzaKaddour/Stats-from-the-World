@@ -11,15 +11,19 @@ st.set_page_config(
 # ------------------------------------------------------------
 # Paths + Data loading
 # ------------------------------------------------------------
-BASE_DIR = Path(__file__).resolve().parent  # Home.py is at project root
+BASE_DIR = Path(__file__).resolve().parent
 DATA_PATH = BASE_DIR / "data" / "processed" / "econ_option_a.parquet"
+
 
 @st.cache_data
 def load_data(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     df = pd.read_parquet(path)
+    if "year" in df.columns:
+        df["year"] = pd.to_numeric(df["year"], errors="coerce")
     return df
+
 
 df = load_data(DATA_PATH)
 
@@ -53,14 +57,23 @@ if df.empty:
 # Quick stats
 # ------------------------------------------------------------
 countries = df["country_code"].nunique() if "country_code" in df.columns else 0
-indicators = sorted(df["indicator_name"].dropna().unique().tolist()) if "indicator_name" in df.columns else []
-year_min = int(df["year"].min()) if "year" in df.columns else None
-year_max = int(df["year"].max()) if "year" in df.columns else None
+year_min = int(df["year"].min()) if "year" in df.columns and df["year"].notna().any() else None
+year_max = int(df["year"].max()) if "year" in df.columns and df["year"].notna().any() else None
 rows = len(df)
+
+available_indicators = [
+    col for col in ["inflation_cpi", "gdp_growth", "unemployment"] if col in df.columns
+]
+indicator_labels = {
+    "inflation_cpi": "Inflation CPI",
+    "gdp_growth": "GDP Growth",
+    "unemployment": "Unemployment",
+}
+indicator_names = [indicator_labels[c] for c in available_indicators]
 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Countries", f"{countries:,}")
-k2.metric("Indicators", f"{len(indicators):,}")
+k2.metric("Indicators", f"{len(indicator_names):,}")
 k3.metric("Years", "—" if year_min is None else f"{year_min} → {year_max}")
 k4.metric("Rows", f"{rows:,}")
 
@@ -77,9 +90,9 @@ with left:
         """
 This project is designed as a **portfolio-grade data product** that demonstrates:
 - **ETL pipeline** (API ingestion → cleaning → parquet)
-- **Exploratory analytics** (country trends, ranking, cross-indicator analysis)
+- **Exploratory analytics** (country trends, rankings, cross-indicator analysis)
 - **Interactive dashboards** (filters, KPIs, maps, downloads)
-- **Deployment readiness** (designed for Hugging Face Spaces or Streamlit hosting)
+- **Deployment readiness** (designed for Streamlit hosting)
 
 The goal is to make global macroeconomic data easy to explore using modern, interactive visualization.
 """
@@ -90,9 +103,9 @@ with right:
     st.markdown(
         """
 1. Use the **sidebar Pages** menu to switch dashboards.
-2. Apply filters (country, indicator, year).
-3. Use **Download CSV** when available to export slices.
-4. Compare countries via **rankings + maps** for fast insights.
+2. Apply filters such as **country** and **year**.
+3. Use page-level visualizations to compare trends and rankings.
+4. Start with **Macro**, then explore **Rankings & Map** and the **Economic Health Index**.
 """
     )
     st.info("Tip: Start with **Macro** for country trends, then use **Rankings & Map** for global context.")
@@ -110,26 +123,26 @@ with c1:
     st.markdown("### 📈 Macro Dashboard")
     st.write(
         """
-**Purpose:** Explore a single country over time and compare indicators.
+**Purpose:** Explore a single country over time and compare macroeconomic indicators.
 
 **What you can do:**
-- Select a country + multiple indicators
-- View KPI snapshots (latest year)
-- Plot trends over time (line chart)
-- Compare indicators in a pivot table
+- Select a country
+- View KPI snapshots for the latest year
+- Plot trends over time
+- Compare inflation, growth, and unemployment
 """
     )
 
     st.markdown("### 🧺 Cost of Living & Affordability")
     st.write(
         """
-**Purpose:** Analyze inflation impact and affordability proxies.
+**Purpose:** Analyze inflation-related cost pressure using available macro variables.
 
 **What you can do:**
-- Track inflation + related cost-of-living indicators
-- View affordability-style plots (e.g., inflation vs GDP per capita)
-- Highlight a country relative to others
-- Export filtered data
+- Track inflation as a cost pressure signal
+- Compare countries on inflation, unemployment, and growth context
+- View a proxy affordability / pressure ranking
+- Explore relative country positioning
 """
     )
 
@@ -137,13 +150,13 @@ with c2:
     st.markdown("### 🗺️ Global Rankings & Map")
     st.write(
         """
-**Purpose:** Compare countries globally for any indicator in a selected year.
+**Purpose:** Compare countries globally for a selected indicator in a selected year.
 
 **What you can do:**
-- Rank **Top / Bottom** countries by indicator and year
-- Visualize results on a full-width **world choropleth map**
-- Switch to log-scale for skewed indicators
-- Download indicator-year slices
+- Rank countries by inflation, GDP growth, or unemployment
+- Visualize results on a **world choropleth map**
+- Compare global patterns quickly
+- Inspect country-level values interactively
 """
     )
 
@@ -153,10 +166,10 @@ with c2:
 **Purpose:** Build a composite economic “health” view.
 
 **What you can do:**
-- Compute an index from growth, inflation, unemployment
-- Normalize indicators (z-scores)
-- Adjust weights (if your page supports it)
-- Rank countries + visualize index on a world map
+- Combine growth, inflation, and unemployment into one score
+- Compare countries on a normalized basis
+- Rank countries using a composite index
+- Visualize economic strength on a world map
 """
     )
 
@@ -170,16 +183,30 @@ st.subheader("Data source & transparency")
 st.write(
     """
 - **Source:** World Bank – World Development Indicators (WDI)
-- **Access method:** World Bank Indicators API (via ETL script)
-- **Processing:** unified long-format table saved as a parquet file
-- **Limitations:** coverage varies by country/year; some indicators may be missing for specific years
+- **Access method:** World Bank API via ETL script
+- **Stored format:** country-year parquet dataset
+- **Indicators included:** Inflation CPI, GDP Growth, Unemployment
+- **Limitations:** coverage varies by country and year; some values may be missing
 """
 )
 
 with st.expander("Show dataset preview"):
-    show_cols = [c for c in ["country", "country_code", "year", "indicator_name", "value", "source"] if c in df.columns]
-    st.dataframe(df[show_cols].head(50), width="stretch")
+    preview_cols = [
+        c
+        for c in [
+            "country_name",
+            "country_code",
+            "region",
+            "income_level",
+            "year",
+            "inflation_cpi",
+            "gdp_growth",
+            "unemployment",
+        ]
+        if c in df.columns
+    ]
+    st.dataframe(df[preview_cols].head(50), use_container_width=True)
 
 st.caption(
-    "This dashboard is for informational purposes. Reported values depend on World Bank coverage and may be missing for some country-year combinations."
+    "This dashboard is for informational purposes. Reported values depend on public datasets coverage and may be missing for some country-year combinations."
 )
