@@ -1,11 +1,5 @@
 __pycache__/
 *.pyc
-.venv/
-venv/
-.env
-!data/raw/.gitkeep
-!data/processed/.gitkeep
 .DS_Store
-*.parquet
 .dashboard/
 .streamlit/
