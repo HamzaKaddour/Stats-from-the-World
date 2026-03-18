@@ -120,7 +120,7 @@ st.subheader("Dashboards inside this project")
 c1, c2 = st.columns(2)
 
 with c1:
-    st.markdown("### 📈 Macro Dashboard")
+    st.markdown("### Macro Dashboard")
     st.write(
         """
 **Purpose:** Explore a single country over time and compare macroeconomic indicators.
@@ -133,7 +133,7 @@ with c1:
 """
     )
 
-    st.markdown("### 🧺 Cost of Living & Affordability")
+    st.markdown("### Cost of Living & Affordability")
     st.write(
         """
 **Purpose:** Analyze inflation-related cost pressure using available macro variables.
@@ -147,7 +147,7 @@ with c1:
     )
 
 with c2:
-    st.markdown("### 🗺️ Global Rankings & Map")
+    st.markdown("### Global Rankings & Map")
     st.write(
         """
 **Purpose:** Compare countries globally for a selected indicator in a selected year.
@@ -160,7 +160,7 @@ with c2:
 """
     )
 
-    st.markdown("### 🧠 Global Health Index")
+    st.markdown("### Global Health Index")
     st.write(
         """
 **Purpose:** Build a composite economic “health” view.
