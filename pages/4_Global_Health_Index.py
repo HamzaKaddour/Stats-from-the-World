@@ -29,6 +29,16 @@ def minmax(series: pd.Series) -> pd.Series:
     return ((s - min_v) / (max_v - min_v)) * 100
 
 
+def latest_complete_year(df: pd.DataFrame, min_complete: int = 30) -> int:
+    coverage = df.groupby("year")[["inflation_cpi", "gdp_growth", "unemployment"]].apply(
+        lambda x: x.dropna().shape[0]
+    )
+    valid = coverage[coverage >= min_complete]
+    if not valid.empty:
+        return int(valid.index.max())
+    return int(df["year"].max())
+
+
 st.title("🩺 Composite Economic Health Index")
 
 if not DATA_PATH.exists():
@@ -36,17 +46,39 @@ if not DATA_PATH.exists():
     st.stop()
 
 df = load_data(DATA_PATH)
-latest_year = int(df["year"].max())
-latest_df = df[df["year"] == latest_year].copy()
+
+valid_years = (
+    df.groupby("year")[["inflation_cpi", "gdp_growth", "unemployment"]]
+    .apply(lambda x: x.dropna().shape[0])
+    .reset_index(name="complete_cases")
+)
+valid_years = valid_years[valid_years["complete_cases"] > 0]["year"].tolist()
+
+default_year = latest_complete_year(df)
+
+top_controls = st.columns([1, 1])
+with top_controls[0]:
+    selected_year = st.selectbox(
+        "Select year",
+        sorted(valid_years, reverse=True),
+        index=sorted(valid_years, reverse=True).index(default_year) if default_year in valid_years else 0,
+    )
+
+with top_controls[1]:
+    region_options = ["All"] + sorted(df["region"].dropna().unique().tolist())
+    selected_region = st.selectbox("Filter by region", region_options)
+
+latest_df = df[df["year"] == selected_year].copy()
+latest_df = latest_df.dropna(subset=["inflation_cpi", "gdp_growth", "unemployment", "country_name"])
+
+if selected_region != "All":
+    latest_df = latest_df[latest_df["region"] == selected_region].copy()
 
 # Normalize components to 0-100
-# GDP growth: higher is better
-# Inflation / unemployment: lower is better, so invert after min-max
 latest_df["gdp_score"] = minmax(latest_df["gdp_growth"])
 latest_df["inflation_score"] = 100 - minmax(latest_df["inflation_cpi"])
 latest_df["unemployment_score"] = 100 - minmax(latest_df["unemployment"])
 
-# Composite index
 latest_df["economic_health_index"] = (
     0.45 * latest_df["gdp_score"].fillna(50)
     + 0.30 * latest_df["inflation_score"].fillna(50)
@@ -54,32 +86,40 @@ latest_df["economic_health_index"] = (
 )
 
 countries = sorted(latest_df["country_name"].dropna().unique().tolist())
-default_country = "United States" if "United States" in countries else countries[0]
-selected_country = st.selectbox("Select country", countries, index=countries.index(default_country))
+default_country = "United States" if "United States" in countries else (countries[0] if countries else None)
 
-country_row = latest_df[latest_df["country_name"] == selected_country].iloc[0]
+selected_country = None
+if countries:
+    selected_country = st.selectbox(
+        "Select country",
+        countries,
+        index=countries.index(default_country) if default_country in countries else 0,
+    )
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Latest Year", latest_year)
-c2.metric("GDP Score", f"{country_row['gdp_score']:.1f}" if pd.notna(country_row["gdp_score"]) else "N/A")
-c3.metric(
-    "Inflation Score",
-    f"{country_row['inflation_score']:.1f}" if pd.notna(country_row["inflation_score"]) else "N/A",
-)
-c4.metric(
-    "Economic Health Index",
-    f"{country_row['economic_health_index']:.1f}" if pd.notna(country_row["economic_health_index"]) else "N/A",
-)
+if selected_country:
+    country_row = latest_df[latest_df["country_name"] == selected_country].iloc[0]
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Selected Year", selected_year)
+    c2.metric("GDP Score", f"{country_row['gdp_score']:.1f}" if pd.notna(country_row["gdp_score"]) else "N/A")
+    c3.metric(
+        "Inflation Score",
+        f"{country_row['inflation_score']:.1f}" if pd.notna(country_row["inflation_score"]) else "N/A",
+    )
+    c4.metric(
+        "Economic Health Index",
+        f"{country_row['economic_health_index']:.1f}" if pd.notna(country_row["economic_health_index"]) else "N/A",
+    )
 
 st.divider()
 
-col1, col2 = st.columns([1.4, 1])
+col1, col2 = st.columns([1.5, 1])
 
 with col1:
-    map_df = latest_df.dropna(subset=["economic_health_index"]).copy()
     fig_map = px.choropleth(
-        map_df,
-        locations="country_code",
+        latest_df,
+        locations="country_name",
+        locationmode="country names",
         color="economic_health_index",
         hover_name="country_name",
         hover_data={
@@ -87,13 +127,16 @@ with col1:
             "inflation_cpi": ":.2f",
             "unemployment": ":.2f",
             "economic_health_index": ":.1f",
-            "country_code": False,
         },
         color_continuous_scale="RdYlGn",
         projection="natural earth",
-        title=f"Composite Economic Health Index ({latest_year})",
+        title=f"Composite Economic Health Index ({selected_year})",
     )
-    fig_map.update_layout(height=650)
+    fig_map.update_geos(showcoastlines=True, showcountries=True, showframe=False)
+    fig_map.update_layout(
+        height=650,
+        margin=dict(l=0, r=0, t=50, b=0),
+    )
     st.plotly_chart(fig_map, use_container_width=True)
 
 with col2:
@@ -120,26 +163,27 @@ with col2:
 
 st.divider()
 
-st.subheader("Component breakdown")
-components_df = pd.DataFrame(
-    {
-        "Component": ["GDP Growth Score", "Inflation Score", "Unemployment Score"],
-        "Score": [
-            country_row["gdp_score"],
-            country_row["inflation_score"],
-            country_row["unemployment_score"],
-        ],
-    }
-)
+if selected_country:
+    st.subheader("Component breakdown")
+    components_df = pd.DataFrame(
+        {
+            "Component": ["GDP Growth Score", "Inflation Score", "Unemployment Score"],
+            "Score": [
+                country_row["gdp_score"],
+                country_row["inflation_score"],
+                country_row["unemployment_score"],
+            ],
+        }
+    )
 
-fig_components = px.bar(
-    components_df,
-    x="Component",
-    y="Score",
-    title=f"Index component scores for {selected_country}",
-)
-fig_components.update_layout(height=450)
-st.plotly_chart(fig_components, use_container_width=True)
+    fig_components = px.bar(
+        components_df,
+        x="Component",
+        y="Score",
+        title=f"Index component scores for {selected_country}",
+    )
+    fig_components.update_layout(height=450)
+    st.plotly_chart(fig_components, use_container_width=True)
 
 st.subheader("Methodology")
 st.markdown(
@@ -150,6 +194,6 @@ The **Economic Health Index** is a simple composite portfolio metric:
 - **30% inflation score** (lower inflation = better)
 - **25% unemployment score** (lower unemployment = better)
 
-Each component is min-max scaled to a 0-100 range using the latest available year.
+Each component is min-max scaled to a 0-100 range within the selected year.
 """
 )
