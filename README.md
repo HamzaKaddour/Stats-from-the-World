@@ -10,7 +10,7 @@ This project demonstrates end-to-end skills in **data engineering, analytics, an
 The dashboard is deployed as a **Streamlit app on Hugging Face Spaces** (free hosting).
 
 🔗 **Live Demo:**  
-https://huggingface.co/spaces/<your-username>/global-economy-dashboard
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stats-from-the-world-34vkcmkxtqwtzi3c9wnfaq.streamlit.app/)
 
 
 ---
@@ -40,7 +40,7 @@ Landing page explaining the project scope, data source, and how to navigate the 
 
 ---
 
-### 📈 Macro Dashboard (Option A)
+###  Macro Dashboard (Option A)
 **Country-level macroeconomic analysis**
 - Inflation (CPI, %)
 - GDP growth (%)
@@ -51,7 +51,7 @@ Landing page explaining the project scope, data source, and how to navigate the 
 
 ---
 
-### 🧺 Cost of Living & Affordability (Option B)
+###  Cost of Living & Affordability (Option B)
 **Inflation impact and affordability-focused views**
 - Inflation trends
 - GDP per capita
@@ -62,7 +62,7 @@ Landing page explaining the project scope, data source, and how to navigate the 
 
 ---
 
-### 🗺️ Global Rankings & Map
+###  Global Rankings & Map
 **Cross-country comparison for any indicator**
 - Top / Bottom country rankings
 - Horizontal bar charts
@@ -73,7 +73,7 @@ Landing page explaining the project scope, data source, and how to navigate the 
 
 ---
 
-### 🧠 Global Economic Health Index (Option C)
+###  Global Economic Health Index (Option C)
 **Composite economic “health” view**
 - Built from GDP growth, inflation, and unemployment
 - Z-score normalization
@@ -92,5 +92,4 @@ Data is retrieved using the **World Bank Indicators API**, processed via a custo
 
 ---
 
-## 🏗️ Project Structure
 
