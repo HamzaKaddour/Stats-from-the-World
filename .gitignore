@@ -9,5 +9,5 @@ data/processed/*
 !data/processed/.gitkeep
 .DS_Store
 *.parquet
-.dashboard
-
+.dashboard/
+.streamlit/
