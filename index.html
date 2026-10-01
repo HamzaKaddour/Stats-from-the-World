@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stats from the World | Global Economic Intelligence</title>
+<meta name="description" content="Interactive global economic data explorer using World Bank indicators.">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2d;--panel2:#11243a;--text:#edf4fb;--muted:#9fb1c5;--accent:#54d2c2;--accent2:#77a7ff;--line:#203650}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#07111f,#091725 55%,#07111f);color:var(--text)}
+.wrap{max-width:1320px;margin:auto;padding:0 28px}.nav{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font-weight:800;letter-spacing:.2px}.brand span{color:var(--accent)}.nav a{color:var(--muted);text-decoration:none;font-size:14px}
+.hero{padding:62px 0 34px}.eyebrow{color:var(--accent);font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.hero h1{font-size:clamp(38px,6vw,72px);line-height:1.02;max-width:950px;margin:12px 0 18px;letter-spacing:-.04em}.hero p{max-width:780px;color:var(--muted);font-size:18px;line-height:1.65}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.pill{border:1px solid var(--line);background:#0a1828;padding:8px 12px;border-radius:999px;color:#bfd0e0;font-size:13px}
+.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin:24px 0}.control{background:var(--panel);border:1px solid var(--line);padding:13px 15px;border-radius:12px}label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}select{width:100%;background:transparent;color:var(--text);border:0;font:inherit;outline:0}option{background:#102136}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:linear-gradient(145deg,var(--panel),#0b1727);border:1px solid var(--line);border-radius:16px;padding:19px}.kpi .value{font-size:28px;font-weight:800}.kpi .label{font-size:12px;color:var(--muted);margin-top:6px}.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}.chart{height:500px}.section{margin:54px 0}.section h2{font-size:26px;margin-bottom:8px}.section>p{color:var(--muted);max-width:800px;line-height:1.6}.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.insight strong{display:block;font-size:18px;margin-bottom:8px}.insight p,.method p{color:var(--muted);line-height:1.55;margin:0}.method{display:grid;grid-template-columns:1fr 1fr;gap:14px}.footer{border-top:1px solid var(--line);padding:30px 0 45px;color:var(--muted);font-size:13px}.status{color:var(--muted);font-size:13px;margin:8px 0 0}
+@media(max-width:850px){.controls,.grid,.method{grid-template-columns:1fr}.kpis,.insights{grid-template-columns:1fr 1fr}.chart{height:420px}}@media(max-width:520px){.kpis,.insights{grid-template-columns:1fr}.wrap{padding:0 16px}}
+</style></head>
+<body><div class="wrap">
+<nav class="nav"><div class="brand">Stats <span>from the World</span></div><a href="https://github.com/HamzaKaddour/Stats-from-the-World">View source on GitHub ↗</a></nav>
+<header class="hero"><div class="eyebrow">Global economic intelligence</div><h1>Explore the world through data.</h1><p>An interactive view of inflation, GDP growth, and unemployment across countries and time, powered by the World Bank World Development Indicators.</p><div class="pills"><span class="pill">World Bank API</span><span class="pill">Interactive maps</span><span class="pill">Time-series analytics</span><span class="pill">Static · zero backend</span></div></header>
+<section><div class="controls">
+<div class="control"><label>Country</label><select id="country"></select></div>
+<div class="control"><label>Indicator</label><select id="metric"><option value="FP.CPI.TOTL.ZG">Inflation (CPI, %)</option><option value="NY.GDP.MKTP.KD.ZG">GDP growth (%)</option><option value="SL.UEM.TOTL.ZS">Unemployment (%)</option></select></div>
+<div class="control"><label>Snapshot year</label><select id="year"></select></div>
+</div><div id="status" class="status">Loading World Bank data…</div></section>
+<section class="kpis">
+<div class="card kpi"><div id="kv1" class="value">—</div><div class="label">Latest inflation</div></div>
+<div class="card kpi"><div id="kv2" class="value">—</div><div class="label">Latest GDP growth</div></div>
+<div class="card kpi"><div id="kv3" class="value">—</div><div class="label">Latest unemployment</div></div>
+<div class="card kpi"><div id="kv4" class="value">—</div><div class="label">Countries in snapshot</div></div>
+</section>
+<section class="grid"><div class="card"><div id="trend" class="chart"></div></div><div class="card"><div id="rank" class="chart"></div></div></section>
+<section class="grid"><div class="card"><div id="map" class="chart"></div></div><div class="card"><div id="scatter" class="chart"></div></div></section>
+<section class="section"><h2>What the data says</h2><p>Automatically generated observations from the selected year. These are descriptive statistics, not causal claims.</p><div class="insights">
+<div class="card insight"><strong id="ins1">—</strong><p id="inst1">Loading.</p></div>
+<div class="card insight"><strong id="ins2">—</strong><p id="inst2">Loading.</p></div>
+<div class="card insight"><strong id="ins3">—</strong><p id="inst3">Loading.</p></div></div></section>
+<section class="section method"><div class="card"><h2>Data pipeline</h2><p>World Bank WDI → API ingestion → country metadata filtering → country-year analytical dataset → interactive browser visualization. The repository also contains a Python/Pandas ETL pipeline and a Streamlit analytics implementation.</p></div><div class="card"><h2>Data notes</h2><p>Coverage differs by indicator, country, and year. The latest reported observation may therefore differ across metrics. Rankings reflect available observations only and should not be interpreted as policy or welfare rankings.</p></div></section>
+<footer class="footer">Built by Hamza Kaddour · Data: World Bank World Development Indicators · Source code and methodology available in the repository.</footer>
+</div>
+<script>
+const API='https://api.worldbank.org/v2', start=2000, end=new Date().getFullYear();
+const metrics={'FP.CPI.TOTL.ZG':'Inflation (CPI, %)','NY.GDP.MKTP.KD.ZG':'GDP growth (%)','SL.UEM.TOTL.ZS':'Unemployment (%)'};
+let countries=[], cache={};
+const layout={paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#b9c9d9'},margin:{l:52,r:20,t:55,b:50},xaxis:{gridcolor:'#1b3048',zerolinecolor:'#29445f'},yaxis:{gridcolor:'#1b3048',zerolinecolor:'#29445f'}};
+async function wb(path){const r=await fetch(API+path+(path.includes('?')?'&':'?')+'format=json&per_page=20000');if(!r.ok)throw Error('World Bank API request failed');return r.json()}
+async function init(){
+ try{
+  const c=await wb('/country?per_page=400');countries=c[1].filter(x=>x.region?.value&&x.region.value!=='Aggregates').sort((a,b)=>a.name.localeCompare(b.name));
+  country.innerHTML=countries.map(x=>`<option value="${x.iso2Code}">${x.name}</option>`).join('');country.value=countries.some(x=>x.iso2Code==='US')?'US':countries[0].iso2Code;
+  year.innerHTML=Array.from({length:end-start+1},(_,i)=>end-i).map(y=>`<option>${y}</option>`).join('');
+  year.value=Math.min(2024,end); await refresh();
+  country.onchange=refreshCountry;metric.onchange=refreshMetric;year.onchange=refreshSnapshot;
+ }catch(e){status.textContent='Could not load live data. '+e.message}
+}
+async function indicator(code){if(cache[code])return cache[code];const d=await wb('/country/all/indicator/'+code+'?date='+start+':'+end);const valid=new Set(countries.map(x=>x.iso2Code));return cache[code]=(d[1]||[]).filter(x=>valid.has(x.countryiso3code? countries.find(c=>c.id===x.countryiso3code)?.iso2Code : x.country?.id)||valid.has(x.country?.id))}
+function iso2(row){return row.country?.id||countries.find(c=>c.id===row.countryiso3code)?.iso2Code}
+async function allMetric(code){const d=await wb('/country/all/indicator/'+code+'?date='+start+':'+end);const valid=new Set(countries.map(x=>x.iso2Code));return (d[1]||[]).filter(x=>valid.has(iso2(x))&&x.value!==null)}
+async function refresh(){status.textContent='Loading World Bank data…';await Promise.all([refreshCountry(),refreshSnapshot()]);status.textContent='Live data loaded from the World Bank API.'}
+async function refreshCountry(){
+ const cc=country.value;const sets=await Promise.all(Object.keys(metrics).map(async code=>[code,(await wb('/country/'+cc+'/indicator/'+code+'?date='+start+':'+end))[1]||[]]));
+ const by=Object.fromEntries(sets);const latest=code=>by[code].find(x=>x.value!==null);
+ kv1.textContent=fmt(latest('FP.CPI.TOTL.ZG')?.value,'%');kv2.textContent=fmt(latest('NY.GDP.MKTP.KD.ZG')?.value,'%');kv3.textContent=fmt(latest('SL.UEM.TOTL.ZS')?.value,'%');
+ const code=metric.value, arr=by[code].filter(x=>x.value!==null).sort((a,b)=>+a.date-+b.date);
+ Plotly.react('trend',[{x:arr.map(x=>x.date),y:arr.map(x=>x.value),type:'scatter',mode:'lines+markers',line:{color:'#54d2c2',width:3},marker:{size:5}}],{...layout,title:{text:country.options[country.selectedIndex].text+' · '+metrics[code],font:{size:16}}},{responsive:true,displaylogo:false});
+}
+async function refreshMetric(){await refreshCountry();await refreshSnapshot()}
+async function refreshSnapshot(){
+ const code=metric.value,y=year.value;status.textContent='Loading '+y+' snapshot…';
+ const rows=(await allMetric(code)).filter(x=>x.date===y);kv4.textContent=rows.length;
+ const sorted=[...rows].sort((a,b)=>b.value-a.value), top=sorted.slice(0,15).reverse();
+ Plotly.react('rank',[{x:top.map(x=>x.value),y:top.map(x=>x.country.value),type:'bar',orientation:'h',marker:{color:'#77a7ff'}}],{...layout,title:{text:'Top reported values · '+y,font:{size:16}},margin:{l:125,r:15,t:55,b:45}},{responsive:true,displaylogo:false});
+ Plotly.react('map',[{type:'choropleth',locations:rows.map(x=>x.countryiso3code),z:rows.map(x=>x.value),text:rows.map(x=>x.country.value),colorscale:'Teal',colorbar:{title:metrics[code]}}],{...layout,title:{text:metrics[code]+' · '+y,font:{size:16}},geo:{projection:{type:'natural earth'},bgcolor:'rgba(0,0,0,0)',showframe:false,showcoastlines:true,coastlinecolor:'#46617b'}},{responsive:true,displaylogo:false});
+ const inf=(await allMetric('FP.CPI.TOTL.ZG')).filter(x=>x.date===y), gd=(await allMetric('NY.GDP.MKTP.KD.ZG')).filter(x=>x.date===y);const gm=new Map(gd.map(x=>[iso2(x),x]));
+ const pairs=inf.filter(x=>gm.has(iso2(x))).map(x=>({name:x.country.value,x:x.value,y:gm.get(iso2(x)).value}));
+ Plotly.react('scatter',[{x:pairs.map(x=>x.x),y:pairs.map(x=>x.y),text:pairs.map(x=>x.name),mode:'markers',type:'scatter',marker:{size:8,color:'#54d2c2',opacity:.75}}],{...layout,title:{text:'Inflation vs GDP growth · '+y,font:{size:16}},xaxis:{...layout.xaxis,title:'Inflation (%)'},yaxis:{...layout.yaxis,title:'GDP growth (%)'}},{responsive:true,displaylogo:false});
+ if(sorted.length){const low=sorted[sorted.length-1];ins1.textContent=sorted[0].country.value;inst1.textContent='Highest reported '+metrics[code].toLowerCase()+': '+fmt(sorted[0].value, code.includes('ZG')||code.includes('ZS')?'%':'');ins2.textContent=low.country.value;inst2.textContent='Lowest reported value: '+fmt(low.value, code.includes('ZG')||code.includes('ZS')?'%':'');ins3.textContent=y;inst3.textContent=rows.length+' countries have a reported value for this indicator.'}
+ status.textContent='Showing '+rows.length+' countries with reported '+y+' data.';
+}
+function fmt(v,s=''){return v==null?'—':Number(v).toFixed(1)+s}init();
+</script></body></html>
