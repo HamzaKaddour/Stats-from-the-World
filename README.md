@@ -1,95 +1,76 @@
-# 🌍 Global Economy Dashboard
+# Stats from the World
 
-An interactive, multi-dashboard analytics application built with **Python, Streamlit, and Plotly**, using **World Bank World Development Indicators (WDI)** to explore global economic trends, country comparisons, and composite economic health.
+An interactive global economic data project built around the **World Bank World Development Indicators (WDI)**. It demonstrates an end-to-end workflow from API ingestion and data preparation to exploratory analytics, geospatial visualization, and static web deployment.
 
-This project demonstrates end-to-end skills in **data engineering, analytics, and visualization**, packaged as a deployable, portfolio-grade web application.
+## Live dashboard
 
----
+After GitHub Pages is enabled for the repository, the static dashboard is available at:
 
-## 🚀 Live Demo
-The dashboard is deployed as a **Streamlit app on Hugging Face Spaces** (free hosting).
+**https://hamzakaddour.github.io/Stats-from-the-World/**
 
-🔗 **Live Demo:**  
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stats-from-the-world-34vkcmkxtqwtzi3c9wnfaq.streamlit.app/)
+The Pages dashboard is intentionally **static and serverless**. It uses Plotly.js in the browser and retrieves public World Bank data directly, so no paid hosting, database, or backend service is required.
 
+## What the project demonstrates
 
----
+- **Data engineering:** World Bank API ingestion, country metadata filtering, cleaning, joins, and Parquet output.
+- **Data analysis:** country-level trends, cross-country comparisons, descriptive insights, and coverage-aware snapshots.
+- **Data visualization:** interactive time series, ranked bar charts, choropleth maps, scatter plots, and KPI cards.
+- **Geospatial analytics:** global country-level mapping with interactive indicator selection.
+- **Web delivery:** a responsive GitHub Pages dashboard with zero backend infrastructure.
+- **Python analytics:** a separate Streamlit implementation remains in the repository for richer Python-driven exploration.
 
-## 📊 What This Project Does
+## Indicators
 
-The Global Economy Dashboard allows users to:
+| Indicator | World Bank code | Interpretation |
+| --- | --- | --- |
+| Inflation, consumer prices | `FP.CPI.TOTL.ZG` | Annual % change in CPI |
+| GDP growth | `NY.GDP.MKTP.KD.ZG` | Annual % growth |
+| Unemployment | `SL.UEM.TOTL.ZS` | % of total labor force |
 
-- Explore **macroeconomic trends** by country and year
-- Analyze **cost-of-living and affordability proxies**
-- Rank countries globally and visualize results on **interactive world maps**
-- Build a **composite economic health index** from multiple indicators
-- Download filtered datasets directly from the UI
+## Repository structure
 
-The application is designed to resemble real-world analytics tools used by:
-- policy analysts  
-- economists  
-- international organizations  
-- data science teams  
+```
+Stats-from-the-World/
+├── index.html                  # Static GitHub Pages dashboard
+├── Home.py                     # Streamlit landing page
+├── pages/                      # Streamlit analytical views
+├── scripts/
+│   └── etl_worldbank.py       # Python ETL pipeline
+├── data/processed/
+│   └── econ_option_a.parquet  # Processed country-year dataset
+└── requirements.txt
+```
 
----
+## Run the Python version locally
 
-## 🧭 Dashboards Overview
+```bash
+python -m venv .venv
+source .venv/bin/activate       # Windows: .venv\\Scripts\\activate
+pip install -r requirements.txt
+python scripts/etl_worldbank.py
+streamlit run Home.py
+```
 
-### 🏠 Home
-Landing page explaining the project scope, data source, and how to navigate the dashboards.
+## GitHub Pages deployment
 
----
+In the repository, open **Settings → Pages**, choose **Deploy from a branch**, select **main** and **/(root)**, then save. GitHub will serve `index.html` as the project site.
 
-###  Macro Dashboard (Option A)
-**Country-level macroeconomic analysis**
-- Inflation (CPI, %)
-- GDP growth (%)
-- Unemployment (%)
-- KPI snapshots (latest year)
-- Interactive time-series plots
-- Indicator comparison tables
+## Methodology and limitations
 
----
+The dashboard uses publicly reported World Bank WDI observations. Coverage varies by country, indicator, and year, so comparisons use the countries with available observations for the selected snapshot.
 
-###  Cost of Living & Affordability (Option B)
-**Inflation impact and affordability-focused views**
-- Inflation trends
-- GDP per capita
-- Exchange rate indicators
-- Inflation vs GDP-per-capita scatter (global affordability proxy)
-- Country highlights and comparisons
-- CSV export of filtered data
+The repository's **Cost Pressure Score** and **Economic Health Index** are exploratory composite metrics created for analytical demonstration. They are **not official World Bank indicators**, and they should not be interpreted as definitive rankings of welfare, economic performance, or policy quality. Their formulas are documented in the corresponding Streamlit pages.
 
----
+## Data source
 
-###  Global Rankings & Map
-**Cross-country comparison for any indicator**
-- Top / Bottom country rankings
-- Horizontal bar charts
-- Full-width interactive choropleth world map
-- Log-scale toggle for skewed indicators
-- Data coverage statistics
-- Indicator-year CSV downloads
+Data source: **World Bank — World Development Indicators (WDI)**, accessed through the World Bank API.
 
----
+## Tech stack
 
-###  Global Economic Health Index (Option C)
-**Composite economic “health” view**
-- Built from GDP growth, inflation, and unemployment
-- Z-score normalization
-- Adjustable weights (if enabled)
-- Global rankings and world map
-- Country-level component breakdown
+Python · Pandas · Streamlit · Plotly · Plotly.js · Parquet · World Bank API · GitHub Pages
 
----
+## Author
 
-## 📚 Data Source
+**Hamza Kaddour** — Machine Learning / AI Engineer
 
-**World Bank – World Development Indicators (WDI)**  
-https://databank.worldbank.org/source/world-development-indicators
-
-Data is retrieved using the **World Bank Indicators API**, processed via a custom ETL pipeline, and stored locally in Parquet format for fast loading.
-
----
-
-
+This project is intended as a portfolio demonstration of data engineering, analytics, visualization, and lightweight web deployment.
