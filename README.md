@@ -1,76 +1,129 @@
 # Stats from the World
 
-An interactive global economic data project built around the **World Bank World Development Indicators (WDI)**. It demonstrates an end-to-end workflow from API ingestion and data preparation to exploratory analytics, geospatial visualization, and static web deployment.
+**A serverless global economic intelligence dashboard built from World Bank data.**
 
-## Live dashboard
+[Live Dashboard](https://hamzakaddour.github.io/Stats-from-the-World/) · [Source Code](https://github.com/HamzaKaddour/Stats-from-the-World)
 
-After GitHub Pages is enabled for the repository, the static dashboard is available at:
+Stats from the World is an end-to-end data engineering and visualization project for exploring macroeconomic conditions across countries and time. A Python ETL pipeline ingests World Bank World Development Indicators, validates and transforms the records into an analytical Parquet dataset, and GitHub Pages serves an interactive Plotly dashboard directly from that artifact.
 
-**https://hamzakaddour.github.io/Stats-from-the-World/**
+## What you can explore
 
-The Pages dashboard is intentionally **static and serverless**. It uses Plotly.js in the browser and retrieves public World Bank data directly, so no paid hosting, database, or backend service is required.
+- Inflation, GDP growth, and unemployment from 2000 to the latest available observations
+- Country-level historical trends
+- Cross-country rankings and world choropleth maps
+- Inflation vs. GDP-growth relationships
+- Region and World Bank income-group filtering
+- Country comparison tables and coverage-aware descriptive insights
 
-## What the project demonstrates
+## Architecture
 
-- **Data engineering:** World Bank API ingestion, country metadata filtering, cleaning, joins, and Parquet output.
-- **Data analysis:** country-level trends, cross-country comparisons, descriptive insights, and coverage-aware snapshots.
-- **Data visualization:** interactive time series, ranked bar charts, choropleth maps, scatter plots, and KPI cards.
-- **Geospatial analytics:** global country-level mapping with interactive indicator selection.
-- **Web delivery:** a responsive GitHub Pages dashboard with zero backend infrastructure.
-- **Python analytics:** a separate Streamlit implementation remains in the repository for richer Python-driven exploration.
+```text
+World Bank WDI API
+        |
+        v
+Python ETL (requests + pandas)
+        |
+        +--> country/aggregate filtering
+        +--> indicator joins
+        +--> type and coverage validation
+        |
+        v
+Validated Parquet dataset
+        |
+        v
+GitHub repository
+        |
+        v
+GitHub Pages + JavaScript + Plotly
+        |
+        v
+Interactive browser analytics
+```
 
-## Indicators
+A scheduled GitHub Actions workflow refreshes the World Bank dataset monthly. If the source data has not changed, the workflow creates no commit. ETL validation prevents unexpectedly incomplete or stale datasets from being published.
 
-| Indicator | World Bank code | Interpretation |
+## Data pipeline
+
+The pipeline in `scripts/etl_worldbank.py`:
+
+1. Retrieves World Bank country metadata and removes aggregate entities.
+2. Retrieves the three indicators over a dynamic year range.
+3. Joins indicator observations by country and year.
+4. Adds region, income group, lending type, capital city and geographic metadata.
+5. Coerces analytical fields to numeric types and validates country/year coverage.
+6. Writes `data/processed/econ_option_a.parquet` for the web application.
+
+### Indicators
+
+| Metric | World Bank code | Unit |
 | --- | --- | --- |
-| Inflation, consumer prices | `FP.CPI.TOTL.ZG` | Annual % change in CPI |
-| GDP growth | `NY.GDP.MKTP.KD.ZG` | Annual % growth |
+| Inflation, consumer prices | `FP.CPI.TOTL.ZG` | Annual % |
+| GDP growth | `NY.GDP.MKTP.KD.ZG` | Annual % |
 | Unemployment | `SL.UEM.TOTL.ZS` | % of total labor force |
+
+## Dashboard engineering
+
+The production dashboard is a static GitHub Pages application. It loads the processed Parquet dataset from the repository and performs filtering, aggregation, ranking, and chart preparation in the browser. This keeps the public demo fast and inexpensive while preserving a reproducible Python data pipeline.
+
+The default snapshot year is selected dynamically using data coverage rather than assuming the newest calendar year is complete.
 
 ## Repository structure
 
-```
-Stats-from-the-World/
-├── index.html                  # Static GitHub Pages dashboard
-├── Home.py                     # Streamlit landing page
-├── pages/                      # Streamlit analytical views
+```text
+.
+├── index.html
 ├── scripts/
-│   └── etl_worldbank.py       # Python ETL pipeline
+│   └── etl_worldbank.py
 ├── data/processed/
-│   └── econ_option_a.parquet  # Processed country-year dataset
+│   └── econ_option_a.parquet
+├── .github/workflows/
+│   └── refresh-worldbank.yml
+├── Home.py
+├── pages/
 └── requirements.txt
 ```
 
-## Run the Python version locally
+The Streamlit files are retained as an alternate Python exploration interface, but GitHub Pages is the primary deployed application.
+
+## Run locally
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\\Scripts\\activate
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python scripts/etl_worldbank.py
 streamlit run Home.py
 ```
 
-## GitHub Pages deployment
+For the production static dashboard, serve the repository root with any local HTTP server rather than opening `index.html` directly:
 
-In the repository, open **Settings → Pages**, choose **Deploy from a branch**, select **main** and **/(root)**, then save. GitHub will serve `index.html` as the project site.
+```bash
+python -m http.server 8000
+```
 
-## Methodology and limitations
+Then open `http://localhost:8000`.
 
-The dashboard uses publicly reported World Bank WDI observations. Coverage varies by country, indicator, and year, so comparisons use the countries with available observations for the selected snapshot.
+## Automated refresh
 
-The repository's **Cost Pressure Score** and **Economic Health Index** are exploratory composite metrics created for analytical demonstration. They are **not official World Bank indicators**, and they should not be interpreted as definitive rankings of welfare, economic performance, or policy quality. Their formulas are documented in the corresponding Streamlit pages.
+`.github/workflows/refresh-worldbank.yml` runs monthly and can also be triggered manually from GitHub Actions. It installs the ETL dependencies, rebuilds and validates the dataset, and commits the Parquet artifact only when World Bank data changed.
 
-## Data source
+## Interpretation and limitations
 
-Data source: **World Bank — World Development Indicators (WDI)**, accessed through the World Bank API.
+World Bank indicator coverage differs by country and year. Missing observations are excluded from snapshot calculations and rankings. The dashboard's automatically generated observations are descriptive and do not imply causality.
+
+The older Streamlit views include exploratory composite measures such as Cost Pressure Score and Economic Health Index. Those are portfolio analytics constructs, not official World Bank indicators.
 
 ## Tech stack
 
-Python · Pandas · Streamlit · Plotly · Plotly.js · Parquet · World Bank API · GitHub Pages
+**Data:** World Bank WDI API  
+**ETL:** Python, pandas, requests, PyArrow  
+**Analytics:** JavaScript, Parquet, client-side filtering and aggregation  
+**Visualization:** Plotly / Plotly.js, choropleth mapping  
+**Automation:** GitHub Actions  
+**Deployment:** GitHub Pages
 
 ## Author
 
 **Hamza Kaddour** — Machine Learning / AI Engineer
 
-This project is intended as a portfolio demonstration of data engineering, analytics, visualization, and lightweight web deployment.
+Built as a portfolio project demonstrating reproducible data ingestion, analytical data modeling, visualization, automation, and lightweight production deployment.
