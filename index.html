@@ -69,7 +69,7 @@ function render(){
  el('kv4').textContent=valid.length;
  const vals=valid.map(r=>clean(r[metric])).sort((a,b)=>a-b);el('kv5').textContent=vals.length?fmt(vals[Math.floor(vals.length/2)]):'—';
  const tr=cRows.filter(r=>clean(r[metric])!==null);
- Plotly.react('trend',[{x:tr.map(r=>r.year),y:tr.map(r=>r[metric]),type:'scatter',mode:'lines+markers',line:{color:C.accent,width:3},marker:{size:5},hovertemplate:'%{x}: %{y:.2f}<extra></extra>'}],{...baseLayout(),title:{text:`${cRows[0]?.country_name||'Country'} · ${METRICS[metric]}`,font:{size:16}}},{responsive:true,displaylogo:false});
+ Plotly.react('trend',[{x:tr.map(r=>r.year),y:tr.map(r=>r[metric]),type:'scatter',mode:'lines+markers',line:{color:C.accent,width:3},marker:{size:5},customdata:tr.map(r=>[r[metric+'_source']||r.data_source||'World Bank WDI',r[metric+'_status']||r.data_status||'reported']),hovertemplate:'%{x}: %{y:.2f}%<br>Source: %{customdata[0]}<br>Status: %{customdata[1]}<extra></extra>'}],{...baseLayout(),title:{text:`${cRows[0]?.country_name||'Country'} · ${METRICS[metric]}`,font:{size:16}}},{responsive:true,displaylogo:false});
  const sorted=[...valid].sort((a,b)=>clean(b[metric])-clean(a[metric])), top=sorted.slice(0,15).reverse();
  Plotly.react('rank',[{x:top.map(r=>r[metric]),y:top.map(r=>r.country_name),type:'bar',orientation:'h',marker:{color:C.accent2},hovertemplate:'%{y}: %{x:.2f}<extra></extra>'}],{...baseLayout(),title:{text:`Highest reported values · ${y}`,font:{size:16}},margin:{l:130,r:15,t:54,b:45}},{responsive:true,displaylogo:false});
  Plotly.react('map',[{type:'choropleth',locationmode:'country names',locations:valid.map(r=>r.country_name),z:valid.map(r=>r[metric]),text:valid.map(r=>r.country_name),colorscale:'Teal',hovertemplate:'%{text}<br>%{z:.2f}<extra></extra>',colorbar:{title:'%'}}],{...baseLayout(),title:{text:`${METRICS[metric]} · ${y}`,font:{size:16}},geo:{projection:{type:'natural earth'},bgcolor:C.bg,showframe:false,showcoastlines:true,coastlinecolor:'#3c5872'}},{responsive:true,displaylogo:false});
@@ -78,13 +78,16 @@ function render(){
  if(sorted.length){const hi=sorted[0],lo=sorted[sorted.length-1];el('ins1').textContent=hi.country_name;el('inst1').textContent=`Highest reported ${METRICS[metric].toLowerCase()} in this filtered snapshot: ${fmt(clean(hi[metric]))}.`;el('ins2').textContent=lo.country_name;el('inst2').textContent=`Lowest reported value in the same snapshot: ${fmt(clean(lo[metric]))}.`;el('ins3').textContent=`${valid.length} countries`;el('inst3').textContent=`have a reported value for ${METRICS[metric].toLowerCase()} in ${y} under the current filters.`}
  else{['ins1','ins2','ins3'].forEach(id=>el(id).textContent='No data');['inst1','inst2','inst3'].forEach(id=>el(id).textContent='Adjust the year or filters to find reported observations.')}
  const table=[...rows].sort((a,b)=>a.country_name.localeCompare(b.country_name)).slice(0,250);el('tbody').innerHTML=table.map(r=>`<tr><td>${r.country_name}</td><td>${r.region||'—'}</td><td>${r.income_level||'—'}</td><td class="num">${fmt(clean(r.inflation_cpi))}</td><td class="num">${fmt(clean(r.gdp_growth))}</td><td class="num">${fmt(clean(r.unemployment))}</td></tr>`).join('');
- el('status').textContent=`Loaded ${DATA.length.toLocaleString()} country-year records from the repository dataset · showing ${valid.length} reported ${y} observations.`;
+ const projected=valid.filter(r=>String(r[metric+'_status']||r.data_status||'').includes('projection')).length;
+ el('status').textContent=`Loaded ${DATA.length.toLocaleString()} country-year records · showing ${valid.length} ${y} observations${projected?` (${projected} estimates/projections)`:''}.`;
 }
 async function init(){
  try{
   const {asyncBufferFromUrl,parquetReadObjects}=await import('https://cdn.jsdelivr.net/npm/hyparquet@1.24.0/+esm');
-  const file=await asyncBufferFromUrl({url:'https://raw.githubusercontent.com/HamzaKaddour/Stats-from-the-World/main/data/processed/econ_option_a.parquet'});
-  DATA=await parquetReadObjects({file});
+  let datasetUrl='https://raw.githubusercontent.com/HamzaKaddour/Stats-from-the-World/main/data/processed/global_economy.parquet';
+  let file;
+  try{file=await asyncBufferFromUrl({url:datasetUrl});DATA=await parquetReadObjects({file})}
+  catch(_){datasetUrl='https://raw.githubusercontent.com/HamzaKaddour/Stats-from-the-World/main/data/processed/econ_option_a.parquet';file=await asyncBufferFromUrl({url:datasetUrl});DATA=await parquetReadObjects({file})}
   DATA=DATA.map(r=>({...r,year:Number(r.year),inflation_cpi:clean(r.inflation_cpi),gdp_growth:clean(r.gdp_growth),unemployment:clean(r.unemployment)})).filter(r=>r.country_name&&Number.isFinite(r.year));
   setOptions(el('country'),[...new Map(DATA.map(r=>[r.country_code,r.country_name])).entries()].sort((a,b)=>a[1].localeCompare(b[1])).map(([code,name])=>name));
   el('country').innerHTML=[...new Map(DATA.map(r=>[r.country_code,r.country_name])).entries()].sort((a,b)=>a[1].localeCompare(b[1])).map(([code,name])=>`<option value="${code}">${name}</option>`).join('');
