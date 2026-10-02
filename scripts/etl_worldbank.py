@@ -22,7 +22,7 @@ INDICATORS: Dict[str, str] = {
 START_YEAR = 2000
 END_YEAR = datetime.now(timezone.utc).year
 PER_PAGE = 20000
-TIMEOUT = 60
+TIMEOUT = 60  # refresh trigger
 
 
 def fetch_json(url: str, params: dict | None = None) -> list:
