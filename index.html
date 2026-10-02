@@ -82,7 +82,7 @@ function render(){
 }
 async function init(){
  try{
-  const {asyncBufferFromUrl,parquetReadObjects}=await import('https://cdn.jsdelivr.net/npm/hyparquet@1.24.0/src/hyparquet.min.js');
+  const {asyncBufferFromUrl,parquetReadObjects}=await import('https://cdn.jsdelivr.net/npm/hyparquet@1.24.0/+esm');
   const file=await asyncBufferFromUrl({url:'data/processed/econ_option_a.parquet'});
   DATA=await parquetReadObjects({file});
   DATA=DATA.map(r=>({...r,year:Number(r.year),inflation_cpi:clean(r.inflation_cpi),gdp_growth:clean(r.gdp_growth),unemployment:clean(r.unemployment)})).filter(r=>r.country_name&&Number.isFinite(r.year));
