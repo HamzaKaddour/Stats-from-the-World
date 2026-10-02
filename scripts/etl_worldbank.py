@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List
 
@@ -19,7 +20,7 @@ INDICATORS: Dict[str, str] = {
 }
 
 START_YEAR = 2000
-END_YEAR = 2025
+END_YEAR = datetime.now(timezone.utc).year
 PER_PAGE = 20000
 TIMEOUT = 60
 
@@ -188,7 +189,17 @@ def main() -> None:
     df = build_dataset()
     df.to_parquet(OUTPUT_PATH, index=False)
 
-    print(f"Saved dataset to: {OUTPUT_PATH}")
+    # Lightweight validation so scheduled refreshes fail before publishing bad data.
+    required = {"country_code", "country_name", "year", *INDICATORS.keys()}
+    missing = required.difference(df.columns)
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+    if df.empty or df["country_code"].nunique() < 150:
+        raise ValueError("Dataset validation failed: unexpectedly low country coverage")
+    if df["year"].max() < datetime.now(timezone.utc).year - 2:
+        raise ValueError("Dataset validation failed: data appears stale")
+
+    print(f"Saved validated dataset to: {OUTPUT_PATH}")
     print(f"Rows: {len(df):,}")
     print(f"Countries: {df['country_code'].nunique():,}")
     if len(df) > 0:
