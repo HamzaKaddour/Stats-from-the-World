@@ -58,6 +58,7 @@ def fetch_country_metadata() -> pd.DataFrame:
             {
                 # IMPORTANT: use iso2Code here
                 "country_code": row.get("iso2Code"),
+                "iso3_code": row.get("id"),
                 "country_name_meta": row.get("name"),
                 "region": (row.get("region") or {}).get("value"),
                 "income_level": (row.get("incomeLevel") or {}).get("value"),
