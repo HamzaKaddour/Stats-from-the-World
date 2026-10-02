@@ -31,14 +31,17 @@ jobs:
       - name: Refresh and validate World Bank dataset
         run: python scripts/etl_worldbank.py
 
+      - name: Build multi-source World Bank + IMF dataset
+        run: python scripts/build_multisource.py
+
       - name: Commit dataset only when changed
         run: |
-          if git diff --quiet -- data/processed/econ_option_a.parquet; then
+          if git diff --quiet -- data/processed/econ_option_a.parquet data/processed/global_economy.parquet; then
             echo "No dataset changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/processed/econ_option_a.parquet
-          git commit -m "data: refresh World Bank indicators"
+          git add data/processed/econ_option_a.parquet data/processed/global_economy.parquet
+          git commit -m "data: refresh World Bank and IMF indicators"
           git push
