@@ -1,0 +1,44 @@
+name: Refresh World Bank dataset
+
+on:
+  schedule:
+    - cron: "17 8 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: world-bank-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ETL dependencies
+        run: pip install pandas pyarrow requests
+
+      - name: Refresh and validate World Bank dataset
+        run: python scripts/etl_worldbank.py
+
+      - name: Commit dataset only when changed
+        run: |
+          if git diff --quiet -- data/processed/econ_option_a.parquet; then
+            echo "No dataset changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed/econ_option_a.parquet
+          git commit -m "data: refresh World Bank indicators"
+          git push
