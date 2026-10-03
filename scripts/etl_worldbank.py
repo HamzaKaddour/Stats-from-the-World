@@ -30,7 +30,7 @@ INDICATORS: Dict[str, str] = {
     "gini": "SI.POV.GINI",
     "poverty_national": "SI.POV.NAHC",
     # Climate & environment
-    "co2_per_capita": "EN.ATM.CO2E.PC",
+    "co2_per_capita": "EN.GHG.CO2.PC.CE.AR5",
     "renewable_energy": "EG.FEC.RNEW.ZS",
     "forest_area": "AG.LND.FRST.ZS",
     # Infrastructure & basic services
