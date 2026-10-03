@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "updated_by": "GitHub Actions data pipeline",
+  "domains": [
+    {
+      "id": "economy",
+      "label": "Economy",
+      "description": "Growth, prices, labor markets and income."
+    },
+    {
+      "id": "people",
+      "label": "People",
+      "description": "Population, health, education and youth labor outcomes."
+    },
+    {
+      "id": "poverty",
+      "label": "Poverty & Equity",
+      "description": "Distributional and national poverty indicators."
+    },
+    {
+      "id": "climate",
+      "label": "Climate",
+      "description": "Emissions, renewables and natural capital."
+    },
+    {
+      "id": "infrastructure",
+      "label": "Infrastructure",
+      "description": "Electricity, water and sanitation access."
+    },
+    {
+      "id": "digital",
+      "label": "Digital",
+      "description": "Internet, mobile and broadband connectivity."
+    }
+  ],
+  "indicators": {
+    "inflation_cpi": {
+      "label": "Inflation, consumer prices",
+      "short": "Inflation",
+      "domain": "economy",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "FP.CPI.TOTL.ZG",
+      "description": "Annual percentage change in consumer prices.",
+      "forecast_source": "IMF WEO",
+      "forecast_code": "PCPIPCH"
+    },
+    "gdp_growth": {
+      "label": "GDP growth",
+      "short": "GDP growth",
+      "domain": "economy",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "NY.GDP.MKTP.KD.ZG",
+      "description": "Annual percentage growth rate of GDP at market prices.",
+      "forecast_source": "IMF WEO",
+      "forecast_code": "NGDP_RPCH"
+    },
+    "unemployment": {
+      "label": "Unemployment",
+      "short": "Unemployment",
+      "domain": "economy",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "SL.UEM.TOTL.ZS",
+      "description": "Share of the total labor force without work but available for and seeking employment.",
+      "forecast_source": "IMF WEO",
+      "forecast_code": "LUR"
+    },
+    "gdp_per_capita": {
+      "label": "GDP per capita",
+      "short": "GDP per capita",
+      "domain": "economy",
+      "unit": "current US$",
+      "format": "currency",
+      "wdi_code": "NY.GDP.PCAP.CD",
+      "description": "GDP divided by midyear population, in current U.S. dollars."
+    },
+    "population": {
+      "label": "Population",
+      "short": "Population",
+      "domain": "people",
+      "unit": "people",
+      "format": "compact",
+      "wdi_code": "SP.POP.TOTL",
+      "description": "Total population."
+    },
+    "life_expectancy": {
+      "label": "Life expectancy at birth",
+      "short": "Life expectancy",
+      "domain": "people",
+      "unit": "years",
+      "format": "number",
+      "wdi_code": "SP.DYN.LE00.IN",
+      "description": "Average number of years a newborn is expected to live."
+    },
+    "youth_unemployment": {
+      "label": "Youth unemployment",
+      "short": "Youth unemployment",
+      "domain": "people",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "SL.UEM.1524.ZS",
+      "description": "Unemployment among ages 15–24 as a share of the youth labor force."
+    },
+    "secondary_enrollment": {
+      "label": "Secondary school enrollment",
+      "short": "Secondary enrollment",
+      "domain": "people",
+      "unit": "% gross",
+      "format": "percent",
+      "wdi_code": "SE.SEC.ENRR",
+      "description": "Gross enrollment ratio for secondary education."
+    },
+    "gini": {
+      "label": "Gini index",
+      "short": "Gini",
+      "domain": "poverty",
+      "unit": "index",
+      "format": "number",
+      "wdi_code": "SI.POV.GINI",
+      "description": "Measure of income or consumption inequality; higher values indicate greater inequality."
+    },
+    "poverty_national": {
+      "label": "Poverty headcount at national poverty lines",
+      "short": "National poverty",
+      "domain": "poverty",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "SI.POV.NAHC",
+      "description": "Share of the population living below the national poverty line."
+    },
+    "co2_per_capita": {
+      "label": "CO₂ emissions per capita",
+      "short": "CO₂ per capita",
+      "domain": "climate",
+      "unit": "t/person",
+      "format": "number",
+      "wdi_code": "EN.ATM.CO2E.PC",
+      "description": "Carbon dioxide emissions per person."
+    },
+    "renewable_energy": {
+      "label": "Renewable energy consumption",
+      "short": "Renewable energy",
+      "domain": "climate",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "EG.FEC.RNEW.ZS",
+      "description": "Renewable energy as a share of total final energy consumption."
+    },
+    "forest_area": {
+      "label": "Forest area",
+      "short": "Forest area",
+      "domain": "climate",
+      "unit": "% of land",
+      "format": "percent",
+      "wdi_code": "AG.LND.FRST.ZS",
+      "description": "Forest area as a share of land area."
+    },
+    "electricity_access": {
+      "label": "Access to electricity",
+      "short": "Electricity access",
+      "domain": "infrastructure",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "EG.ELC.ACCS.ZS",
+      "description": "Share of population with access to electricity."
+    },
+    "drinking_water_basic": {
+      "label": "At least basic drinking water services",
+      "short": "Basic drinking water",
+      "domain": "infrastructure",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "SH.H2O.BASW.ZS",
+      "description": "Share of population using at least basic drinking water services."
+    },
+    "sanitation_basic": {
+      "label": "At least basic sanitation services",
+      "short": "Basic sanitation",
+      "domain": "infrastructure",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "SH.STA.BASS.ZS",
+      "description": "Share of population using at least basic sanitation services."
+    },
+    "internet_users": {
+      "label": "Individuals using the Internet",
+      "short": "Internet use",
+      "domain": "digital",
+      "unit": "%",
+      "format": "percent",
+      "wdi_code": "IT.NET.USER.ZS",
+      "description": "Share of population using the Internet."
+    },
+    "mobile_subscriptions": {
+      "label": "Mobile cellular subscriptions",
+      "short": "Mobile subscriptions",
+      "domain": "digital",
+      "unit": "per 100 people",
+      "format": "number",
+      "wdi_code": "IT.CEL.SETS.P2",
+      "description": "Mobile cellular subscriptions per 100 people."
+    },
+    "fixed_broadband": {
+      "label": "Fixed broadband subscriptions",
+      "short": "Fixed broadband",
+      "domain": "digital",
+      "unit": "per 100 people",
+      "format": "number",
+      "wdi_code": "IT.NET.BBND.P2",
+      "description": "Fixed broadband subscriptions per 100 people."
+    }
+  }
+}
