@@ -136,8 +136,8 @@
       "domain": "climate",
       "unit": "t/person",
       "format": "number",
-      "wdi_code": "EN.ATM.CO2E.PC",
-      "description": "Carbon dioxide emissions per person."
+      "wdi_code": "EN.GHG.CO2.PC.CE.AR5",
+      "description": "Carbon dioxide emissions excluding LULUCF per person."
     },
     "renewable_energy": {
       "label": "Renewable energy consumption",
