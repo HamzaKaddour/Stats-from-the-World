@@ -1,5 +1,7 @@
 # Stats from the World
 
+[**Portfolio case study → https://hamzakaddour.github.io/case-studies/global-development.html**](https://hamzakaddour.github.io/case-studies/global-development.html)
+
 **A source-aware global development intelligence platform built entirely on free public data and serverless infrastructure.**
 
 [Live Dashboard](https://hamzakaddour.github.io/Stats-from-the-World/) · [Source Code](https://github.com/HamzaKaddour/Stats-from-the-World)
