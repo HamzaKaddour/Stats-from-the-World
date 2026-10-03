@@ -116,18 +116,20 @@ def main() -> None:
             statuses = [
                 row.get(f"{metric}_status")
                 for metric in IMF_SERIES
-                if row.get(metric) is not None
+                if pd.notna(row.get(metric))
             ]
             sources = [
                 row.get(f"{metric}_source")
                 for metric in IMF_SERIES
-                if row.get(metric) is not None
+                if pd.notna(row.get(metric))
             ]
-            if any(s == "estimate/projection" for s in statuses):
-                row["data_status"] = "mixed/reported+projection" if "reported" in statuses else "projection"
+            clean_statuses = [str(s) for s in statuses if pd.notna(s)]
+            clean_sources = [str(s) for s in sources if pd.notna(s)]
+            if any(s == "estimate/projection" for s in clean_statuses):
+                row["data_status"] = "mixed/reported+projection" if "reported" in clean_statuses else "projection"
             else:
                 row["data_status"] = "reported"
-            row["data_source"] = " + ".join(sorted(set(s for s in sources if s))) or "World Bank WDI"
+            row["data_source"] = " + ".join(sorted(set(clean_sources))) or "World Bank WDI"
 
             existing[key] = row
 
