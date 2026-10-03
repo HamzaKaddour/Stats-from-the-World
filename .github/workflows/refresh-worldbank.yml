@@ -48,4 +48,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/processed/econ_option_a.parquet data/processed/global_economy.parquet
           git commit -m "data: refresh World Bank and IMF indicators"
-          git push
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
