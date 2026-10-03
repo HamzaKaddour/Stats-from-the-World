@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +10,7 @@ import requests
 BASE_DIR = Path(__file__).resolve().parents[1]
 WB_PATH = BASE_DIR / "data" / "processed" / "econ_option_a.parquet"
 OUT_PATH = BASE_DIR / "data" / "processed" / "global_economy.parquet"
+MANIFEST_PATH = BASE_DIR / "data" / "processed" / "data_manifest.json"
 IMF_API = "https://www.imf.org/external/datamapper/api/v1"
 
 # IMF World Economic Outlook / DataMapper series used for current-year estimates
@@ -157,7 +160,33 @@ def main() -> None:
     combined = combined.sort_values(["country_name", "year"]).reset_index(drop=True)
     combined.to_parquet(OUT_PATH, index=False)
 
+    manifest = {
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "row_count": int(len(combined)),
+        "country_count": int(combined["iso3_code"].nunique()),
+        "year_min": int(combined["year"].min()),
+        "year_max": int(combined["year"].max()),
+        "sources": [
+            {
+                "name": "World Bank World Development Indicators",
+                "short": "World Bank WDI",
+                "role": "reported observations",
+                "url": "https://api.worldbank.org/v2/",
+            },
+            {
+                "name": "IMF World Economic Outlook / DataMapper",
+                "short": "IMF WEO",
+                "role": "estimates and projections for selected macroeconomic series",
+                "url": "https://www.imf.org/external/datamapper/api/v1/",
+            },
+        ],
+        "forecast_years": FORECAST_YEARS,
+        "provenance_rule": "Metric-level source/status fields are authoritative. WDI reported observations take precedence; IMF WEO fills missing current/future macro values.",
+    }
+    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
     print(f"Saved multi-source dataset: {OUT_PATH}")
+    print(f"Saved data manifest: {MANIFEST_PATH}")
     print(f"Rows: {len(combined):,}")
     for year in [2025, 2026, 2030]:
         part = combined[combined["year"] == year]
