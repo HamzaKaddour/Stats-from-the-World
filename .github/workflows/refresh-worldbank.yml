@@ -1,4 +1,4 @@
-name: Refresh World Bank dataset
+name: Refresh Global Development Data
 
 on:
   push:
@@ -40,14 +40,14 @@ jobs:
 
       - name: Commit dataset only when changed
         run: |
-          if git diff --quiet -- data/processed/econ_option_a.parquet data/processed/global_economy.parquet; then
+          if git diff --quiet -- data/processed/econ_option_a.parquet data/processed/global_economy.parquet data/processed/data_manifest.json; then
             echo "No dataset changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/processed/econ_option_a.parquet data/processed/global_economy.parquet
-          git commit -m "data: refresh World Bank and IMF indicators"
+          git add data/processed/econ_option_a.parquet data/processed/global_economy.parquet data/processed/data_manifest.json
+          git commit -m "data: refresh global development indicators"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
