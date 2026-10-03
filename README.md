@@ -1,10 +1,10 @@
 # Stats from the World
 
-**A serverless global economic intelligence dashboard built from World Bank data.**
+**A source-aware global economic intelligence dashboard combining reported observations with clearly labeled estimates and forecasts.**
 
 [Live Dashboard](https://hamzakaddour.github.io/Stats-from-the-World/) · [Source Code](https://github.com/HamzaKaddour/Stats-from-the-World)
 
-Stats from the World is an end-to-end data engineering and visualization project for exploring macroeconomic conditions across countries and time. A Python ETL pipeline ingests World Bank World Development Indicators, validates and transforms the records into an analytical Parquet dataset, and GitHub Pages serves an interactive Plotly dashboard directly from that artifact.
+Stats from the World is an end-to-end data engineering and visualization project for exploring macroeconomic conditions across countries and time. The pipeline combines World Bank World Development Indicators (WDI) with IMF World Economic Outlook (WEO) data, preserves metric-level provenance and status, and serves the resulting analytical dataset through an interactive GitHub Pages dashboard.
 
 ## What you can explore
 
@@ -18,8 +18,10 @@ Stats from the World is an end-to-end data engineering and visualization project
 ## Architecture
 
 ```text
-World Bank WDI API
-        |
+World Bank WDI API (reported observations)     IMF WEO / DataMapper (estimates & projections)
+        |                                              |
+        +----------------------+-----------------------+
+                               |
         v
 Python ETL (requests + pandas)
         |
@@ -40,7 +42,7 @@ GitHub Pages + JavaScript + Plotly
 Interactive browser analytics
 ```
 
-A scheduled GitHub Actions workflow refreshes the World Bank dataset monthly. If the source data has not changed, the workflow creates no commit. ETL validation prevents unexpectedly incomplete or stale datasets from being published.
+A scheduled GitHub Actions workflow refreshes the World Bank and IMF datasets monthly. If the source data has not changed, the workflow creates no commit. ETL validation prevents unexpectedly incomplete or stale datasets from being published.
 
 ## Data pipeline
 
@@ -109,13 +111,13 @@ Then open `http://localhost:8000`.
 
 ## Interpretation and limitations
 
-World Bank indicator coverage differs by country and year. Missing observations are excluded from snapshot calculations and rankings. The dashboard's automatically generated observations are descriptive and do not imply causality.
+World Bank indicator coverage differs by country and year. Missing observations are excluded from snapshot calculations and rankings. The dashboard's automatically generated observations are descriptive and do not imply causality. Each metric retains a source and status field. IMF WEO values for future years are estimates/projections, not realized outcomes, and the interface labels them accordingly.
 
 The older Streamlit views include exploratory composite measures such as Cost Pressure Score and Economic Health Index. Those are portfolio analytics constructs, not official World Bank indicators.
 
 ## Tech stack
 
-**Data:** World Bank WDI API  
+**Data:** World Bank WDI API, IMF World Economic Outlook / DataMapper  
 **ETL:** Python, pandas, requests, PyArrow  
 **Analytics:** JavaScript, Parquet, client-side filtering and aggregation  
 **Visualization:** Plotly / Plotly.js, choropleth mapping  
