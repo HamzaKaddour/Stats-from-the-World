@@ -38,7 +38,7 @@ button,select{font:inherit}.wrap{max-width:1500px;margin:auto;padding:0 28px}
 .country-shell{padding:22px}.country-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.country-name{font-size:31px;font-weight:850;letter-spacing:-.035em}.country-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.country-actions{display:flex;gap:8px;flex-wrap:wrap}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:19px}.kpi{border:1px solid var(--line);background:#0a1926;border-radius:13px;padding:16px}.kpi .value{font-size:25px;font-weight:830}.kpi .label{font-size:10px;color:var(--muted);margin-top:4px}.kpi .source{font-size:10px;color:#7d95a6;margin-top:7px;line-height:1.45}.forecast-text{color:var(--gold)}
 .country-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;margin-top:12px}.chart-card{padding:10px}.chart{height:430px}
-.benchmark{padding:18px}.benchmark h3,.domain-panel h3,.lineage h3{margin:0 0 5px;font-size:16px}.benchmark p,.domain-panel p,.lineage p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}.bench-row{margin-top:17px}.bench-label{display:flex;justify-content:space-between;gap:10px;font-size:11px}.bench-track{height:7px;background:#162b3b;border-radius:999px;margin-top:7px;overflow:hidden}.bench-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--teal),var(--blue))}
+.benchmark{padding:18px}.benchmark h3,.domain-panel h3,.lineage h3{margin:0 0 5px;font-size:16px}.benchmark p,.domain-panel p,.lineage p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}.bench-row{margin-top:17px}.bench-label{display:flex;justify-content:space-between;gap:10px;font-size:11px}.bench-source{font-size:9px;color:#6f8899;margin-top:4px}.bench-track{height:7px;background:#162b3b;border-radius:999px;margin-top:7px;overflow:hidden}.bench-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--teal),var(--blue))}
 .domain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.domain-card{padding:16px;min-height:145px}.domain-card .dname{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--teal);font-weight:800}.domain-card .dmetric{font-size:12px;color:var(--muted);margin-top:12px}.domain-card .dvalue{font-size:22px;font-weight:820;margin-top:3px}.domain-card .dsource{font-size:9px;color:#718a9c;margin-top:5px}
 .progress{margin-top:12px;padding:18px}.progress h3{margin:0 0 5px;font-size:16px}.progress p{font-size:11px;color:var(--muted);margin:0 0 12px}.progress table td small{display:block;color:#70899a;margin-top:3px}
 .method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}.method-card{padding:18px}.method-card .num{font-size:11px;color:var(--teal);font-weight:800;letter-spacing:.1em}.method-card h3{margin:7px 0 8px;font-size:16px}.method-card p{color:var(--muted);font-size:12px;line-height:1.65;margin:0}.lineage-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.node{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#0a1926;font-size:11px}.arrow{color:#58758a}
@@ -237,9 +237,9 @@ function renderExplorer(){
   if(rows.length){
     const sorted=[...rows].sort((a,b)=>clean(b[m])-clean(a[m])),high=sorted[0],low=sorted[sorted.length-1];
     el('snapCoverage').textContent=rows.length;el('snapCoverageSub').textContent=sources.join(' + ')||'—';
-    el('snapMedian').textContent=formatValue(med,m);el('snapMedianSub').textContent='Across current filters';
-    el('snapHigh').textContent=formatValue(high[m],m);el('snapHighSub').textContent=high.country_name;
-    el('snapLow').textContent=formatValue(low[m],m);el('snapLowSub').textContent=low.country_name;
+    el('snapMedian').textContent=formatValue(med,m);el('snapMedianSub').textContent='Derived median · '+(sources.join(' + ')||'source unavailable');
+    el('snapHigh').textContent=formatValue(high[m],m);el('snapHighSub').textContent=high.country_name+' · '+metricSource(high,m)+' · '+metricStatus(high,m);
+    el('snapLow').textContent=formatValue(low[m],m);el('snapLowSub').textContent=low.country_name+' · '+metricSource(low,m)+' · '+metricStatus(low,m);
     el('snapStatus').textContent=projected&&reported?'Mixed':projected?'Projected':'Reported';el('snapStatusSub').textContent=reported+' reported · '+projected+' estimated/projected';
   }else{
     ['snapCoverage','snapMedian','snapHigh','snapLow','snapStatus'].forEach(id=>el(id).textContent='—');
@@ -289,17 +289,19 @@ function renderCountry(){
   renderProgress(rows);
 }
 function renderBenchmarks(meta,m,y){
-  const selected=filteredSnapshot().find(r=>r.country_code===meta.country_code);
   const all=DATA.filter(r=>r.year===y&&clean(r[m])!==null&&statusAllowed(r,m));
+  const selected=all.find(r=>r.country_code===meta.country_code)||null;
+  const regionRows=all.filter(r=>r.region===meta.region),incomeRows=all.filter(r=>r.income_level===meta.income_level);
+  const srcLabel=rows=>uniq(rows.map(r=>metricSource(r,m))).join(' + ')||'source unavailable';
   const groups=[
-    ['Selected country',selected?clean(selected[m]):null],
-    ['Regional median',median(all.filter(r=>r.region===meta.region).map(r=>clean(r[m])))],
-    ['Income-group median',median(all.filter(r=>r.income_level===meta.income_level).map(r=>clean(r[m])))],
-    ['Global median',median(all.map(r=>clean(r[m])))]
+    ['Selected country',selected?clean(selected[m]):null,selected?metricSource(selected,m)+' · '+metricStatus(selected,m):'No selected-year observation'],
+    ['Regional median',median(regionRows.map(r=>clean(r[m]))),'Derived from '+srcLabel(regionRows)],
+    ['Income-group median',median(incomeRows.map(r=>clean(r[m]))),'Derived from '+srcLabel(incomeRows)],
+    ['Global median',median(all.map(r=>clean(r[m]))),'Derived from '+srcLabel(all)]
   ];
   const valid=groups.map(x=>x[1]).filter(v=>v!==null),lo=Math.min(...valid,0),hi=Math.max(...valid,1),span=(hi-lo)||1;
-  el('benchRows').innerHTML=groups.map(([label,v])=>'<div class="bench-row"><div class="bench-label"><span>'+label+'</span><strong>'+formatValue(v,m)+'</strong></div><div class="bench-track"><div class="bench-fill" style="width:'+Math.max(3,Math.min(100,((v===null?lo:v)-lo)/span*100))+'%"></div></div></div>').join('');
-  el('benchIntro').textContent=info(m).short+' · '+y+' median comparison. Descriptive context only; no performance judgment is implied.';
+  el('benchRows').innerHTML=groups.map(([label,v,src])=>'<div class="bench-row"><div class="bench-label"><span>'+label+'</span><strong>'+formatValue(v,m)+'</strong></div><div class="bench-source">'+src+'</div><div class="bench-track"><div class="bench-fill" style="width:'+Math.max(3,Math.min(100,((v===null?lo:v)-lo)/span*100))+'%"></div></div></div>').join('');
+  el('benchIntro').textContent=info(m).short+' · '+y+' median comparison. Derived medians retain the source composition of their contributing observations; no performance judgment is implied.';
 }
 function renderDomainCards(rows){
   const representatives={economy:'gdp_per_capita',people:'life_expectancy',poverty:'gini',climate:'renewable_energy',infrastructure:'electricity_access',digital:'internet_users'};
