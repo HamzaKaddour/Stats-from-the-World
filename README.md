@@ -1,5 +1,10 @@
 # Stats from the World
 
+[![CI](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/ci.yml)
+[![Data Refresh](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/refresh-worldbank.yml/badge.svg)](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/refresh-worldbank.yml)
+[![Release](https://img.shields.io/github/v/release/HamzaKaddour/Stats-from-the-World?label=release)](https://github.com/HamzaKaddour/Stats-from-the-World/releases/latest)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/HamzaKaddour/Stats-from-the-World?quickstart=1)
+
 [**Portfolio case study → https://hamzakaddour.github.io/case-studies/global-development.html**](https://hamzakaddour.github.io/case-studies/global-development.html)
 
 **A source-aware global development intelligence platform built entirely on free public data and serverless infrastructure.**
