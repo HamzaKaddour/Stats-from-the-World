@@ -5,6 +5,11 @@
 [![Release](https://img.shields.io/github/v/release/HamzaKaddour/Stats-from-the-World?label=release)](https://github.com/HamzaKaddour/Stats-from-the-World/releases/latest)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/HamzaKaddour/Stats-from-the-World?quickstart=1)
 
+
+### One-click development
+
+The repository includes a `.devcontainer` configuration for GitHub Codespaces. Use the **Open in GitHub Codespaces** badge above to launch a Python 3.11 environment with the project dependencies installed. Serve the static dashboard with `python -m http.server 8000` or run the Streamlit interface with `streamlit run Home.py`.
+
 [**Portfolio case study → https://hamzakaddour.github.io/case-studies/global-development.html**](https://hamzakaddour.github.io/case-studies/global-development.html)
 
 **A source-aware global development intelligence platform built entirely on free public data and serverless infrastructure.**
