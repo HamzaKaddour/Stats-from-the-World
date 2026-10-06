@@ -25,16 +25,16 @@ jobs:
           fi
 
           cat > /tmp/release-notes.md <<'EOF'
-First portfolio release of the source-aware global development intelligence platform.
-
-Highlights:
-- World Bank WDI + IMF WEO multi-source integration
-- metric-level provenance and reported-vs-projection status
-- six development domains and 19 curated indicators
-- country benchmarking, progress views, map/table exploration
-- automated ETL, validation, Parquet analytical layer, and GitHub Pages delivery
-- reproducible Codespaces development environment
-EOF
+          First portfolio release of the source-aware global development intelligence platform.
+          
+          Highlights:
+          - World Bank WDI + IMF WEO multi-source integration
+          - metric-level provenance and reported-vs-projection status
+          - six development domains and 19 curated indicators
+          - country benchmarking, progress views, map/table exploration
+          - automated ETL, validation, Parquet analytical layer, and GitHub Pages delivery
+          - reproducible Codespaces development environment
+          EOF
 
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
