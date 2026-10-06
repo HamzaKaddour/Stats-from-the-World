@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas pyarrow
+
+      - name: Compile ETL scripts
+        run: python -m py_compile scripts/*.py
+
+      - name: Validate analytical artifacts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          data_path = Path("data/processed/global_economy.parquet")
+          manifest_path = Path("data/processed/data_manifest.json")
+          catalog_path = Path("data/indicator_catalog.json")
+
+          assert data_path.exists(), "Missing global_economy.parquet"
+          assert manifest_path.exists(), "Missing data_manifest.json"
+          assert catalog_path.exists(), "Missing indicator_catalog.json"
+
+          df = pd.read_parquet(data_path)
+          required = {"iso3_code", "country_name", "year", "gdp_growth", "inflation_cpi", "unemployment"}
+          missing = required.difference(df.columns)
+          assert not missing, f"Missing required columns: {sorted(missing)}"
+          assert len(df) > 1000, "Unexpectedly small analytical dataset"
+          assert df["iso3_code"].nunique() >= 150, "Unexpectedly low country coverage"
+
+          manifest = json.loads(manifest_path.read_text())
+          catalog = json.loads(catalog_path.read_text())
+          assert manifest.get("row_count", 0) > 1000
+          assert len(catalog.get("indicators", {})) >= 10
+
+          print(f"Validated {len(df):,} rows across {df['iso3_code'].nunique()} countries/economies.")
+          PY
