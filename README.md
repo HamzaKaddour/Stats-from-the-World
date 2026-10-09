@@ -1,5 +1,6 @@
 # Stats from the World
 
+[![CodeQL](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/codeql.yml/badge.svg)](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/codeql.yml)
 [![CI](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/ci.yml)
 [![Data Refresh](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/refresh-worldbank.yml/badge.svg)](https://github.com/HamzaKaddour/Stats-from-the-World/actions/workflows/refresh-worldbank.yml)
 [![Release](https://img.shields.io/github/v/release/HamzaKaddour/Stats-from-the-World?label=release)](https://github.com/HamzaKaddour/Stats-from-the-World/releases/latest)
